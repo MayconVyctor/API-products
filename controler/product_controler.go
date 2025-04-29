@@ -84,6 +84,54 @@ func (p *productControler) GetProductById(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, product)
 }
 
+func (p *productControler) UpdateProduct(ctx *gin.Context) {
+	id := ctx.Param("productId")
+	if id == "" {
+		response := model.Response{
+			Message: "Id from product cannot null",
+		}
+		ctx.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	productId, err := strconv.Atoi(id)
+	if err != nil {
+		response := model.Response{
+			Message: "The product id must be a number",
+		}
+		ctx.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	var productRequest model.Product
+	if err := ctx.ShouldBindJSON(&productRequest); err != nil {
+		response := model.Response{
+			Message: "Error reading product data",
+		}
+		ctx.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	updatedProduct, err := p.productUseCase.UpdateProduct(productId, productRequest)
+	if err != nil {
+		response := model.Response{
+			Message: "Error to updated product",
+		}
+		ctx.JSON(http.StatusInternalServerError, response)
+		return
+	}
+
+	if updatedProduct.ID == 0 {
+		response := model.Response{
+			Message: "The product not found in database",
+		}
+		ctx.JSON(http.StatusNotFound, response)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, updatedProduct)
+}
+
 func (p *productControler) DeleteProduct(ctx *gin.Context) {
 
 	id := ctx.Param("productId")

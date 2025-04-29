@@ -92,6 +92,30 @@ func (pr *ProductRepository) GetProductById(id_product int) (*model.Product, err
 	return &produto, nil
 }
 
+func (pr *ProductRepository) UpdateProduct(id_product int, request model.Product) (*model.Product, error) {
+
+	query, err := pr.connection.Prepare("UPDATE product SET product_name = $1, price = $2 WHERE id = $3")
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	_, err = query.Exec(request.Name, request.Price, id_product)
+	if err != nil {
+		fmt.Println(err)
+		return &model.Product{}, err
+	}
+
+	updateProduct := &model.Product{
+		ID:    id_product,
+		Name:  request.Name,
+		Price: request.Price,
+	}
+
+	query.Close()
+	return updateProduct, nil
+}
+
 func (pr *ProductRepository) DeleteProduct(id_product int) (*model.Product, error) {
 	query, err := pr.connection.Prepare("DELETE  FROM product WHERE id = $1")
 	if err != nil {
