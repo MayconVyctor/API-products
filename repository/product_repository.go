@@ -17,7 +17,7 @@ func NewProductRepository(connection *sql.DB) ProductRepository {
 }
 
 func (pr *ProductRepository) GetProducts() ([]model.Product, error) {
-	query := "SELECT id, product_name, price from product"
+	query := "SELECT id, product_name, price, stock from product"
 	rows, err := pr.connection.Query(query)
 	if err != nil {
 		fmt.Println(err)
@@ -32,6 +32,7 @@ func (pr *ProductRepository) GetProducts() ([]model.Product, error) {
 			&productObj.ID,
 			&productObj.Name,
 			&productObj.Price,
+			&productObj.Stock,
 		)
 		if err != nil {
 			fmt.Println(err)
@@ -114,6 +115,30 @@ func (pr *ProductRepository) UpdateProduct(id_product int, request model.Product
 
 	query.Close()
 	return updateProduct, nil
+}
+
+func (pr *ProductRepository) UpdateStock(id_product int, request model.Product) (*model.Product, error) {
+	query := "UPDATE product SET stock = $1 WHERE id = $2  RETURNING id, product_name, price, stock"
+	row := pr.connection.QueryRow(query, request.Stock, id_product)
+
+	var requestStock model.Product
+
+	err := row.Scan(
+		&requestStock.ID,
+		&requestStock.Name,
+		&requestStock.Price,
+		&requestStock.Stock,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return &requestStock, nil
+
 }
 
 func (pr *ProductRepository) DeleteProduct(id_product int) (*model.Product, error) {
