@@ -25,9 +25,9 @@ func (pr *ProductRepository) GetProducts() ([]model.Product, error) {
 	}
 
 	var productList []model.Product
-	var productObj model.Product
 
 	for rows.Next() {
+		var productObj model.Product
 		err = rows.Scan(
 			&productObj.ID,
 			&productObj.Name,
@@ -80,6 +80,7 @@ func (pr *ProductRepository) GetProductById(id_product int) (*model.Product, err
 		&produto.ID,
 		&produto.Name,
 		&produto.Price,
+		&produto.Stock,
 	)
 
 	if err != nil {

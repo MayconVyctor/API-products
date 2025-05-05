@@ -52,7 +52,7 @@ func (p *productControler) GetProductById(ctx *gin.Context) {
 	id := ctx.Param("productId")
 	if id == "" {
 		response := model.Response{
-			Message: "Id from product cannot null",
+			Message: "Product ID cannot be null",
 		}
 		ctx.JSON(http.StatusBadRequest, response)
 		return
